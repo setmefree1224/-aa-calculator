@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AA 计算器</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+    background: #f5f4f0;
+    color: #1a1a1a;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    color: #1a1a1a;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: #fff;
+    border: 0.5px solid #ddd;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 0.5px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1a1a1a;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus { border-color: #888; }
+
+  button {
+    padding: 8px 16px;
+    border: 0.5px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  button:hover { background: #f0efeb; }
+  button:active { transform: scale(0.98); }
+
+  .btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .btn-primary:hover { background: #333; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row input { flex: 1; }
+
+  .people-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; min-height: 0; }
+
+  .tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f4f0;
+    border: 0.5px solid #ddd;
+    border-radius: 20px;
+    padding: 4px 8px 4px 12px;
+    font-size: 13px;
+  }
+
+  .tag-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #999;
+    font-size: 15px;
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .tag-remove:hover { color: #333; background: none; transform: none; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+  .label-sm {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+    margin-top: 8px;
+  }
+
+  .check-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 0.5px solid #ddd;
+    border-radius: 20px;
+    transition: background 0.12s;
+    user-select: none;
+  }
+
+  .check-label:hover { background: #f5f4f0; }
+  .check-label input { accent-color: #1a1a1a; }
+
+  .item-entry {
+    padding: 10px 0;
+    border-bottom: 0.5px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .item-entry:last-child { border-bottom: none; }
+
+  .item-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .item-meta { font-size: 12px; color: #888; }
+
+  .item-del {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .item-del:hover { color: #555; background: none; transform: none; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 0.5px solid #eee;
+    font-size: 14px;
+  }
+
+  .result-row:last-child { border-bottom: none; }
+
+  .r-name { font-weight: 500; }
+
+  .r-amount { font-size: 15px; font-weight: 500; }
+  .r-in { color: #1a7a4a; }
+  .r-out { color: #c0392b; }
+  .r-zero { color: #999; }
+
+  .settle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 0.5px solid #eee;
+    font-size: 14px;
+  }
+
+  .settle-row:last-child { border-bottom: none; }
+  .s-arrow { color: #bbb; font-size: 16px; }
+  .s-amount { font-weight: 500; color: #1a1a1a; }
+
+  .empty {
+    font-size: 13px;
+    color: #bbb;
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .divider { height: 0.5px; background: #eee; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>AA 计算器</h1>
+
+  <div class="card">
+    <div class="card-title">参与的人</div>
+    <div class="people-wrap" id="people-tags"></div>
+    <div class="row">
+      <input type="text" id="person-input" placeholder="输入名字" maxlength="8" />
+      <button onclick="addPerson()">添加</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">消费项目</div>
+    <div id="items-list"></div>
+
+    <div class="divider" id="form-divider" style="display:none;"></div>
+
+    <div class="grid2" style="margin-top:4px;">
+      <input type="text" id="item-name" placeholder="项目名（如：火锅）" />
+      <input type="number" id="item-amount" placeholder="金额" min="0" step="0.01" />
+    </div>
+
+    <div class="label-sm">谁付的钱</div>
+    <div class="check-wrap" id="payer-checks"><span class="empty" style="padding:4px 0;">先添加参与人</span></div>
+
+    <div class="label-sm">谁参与AA</div>
+    <div class="check-wrap" id="splitter-checks"><span class="empty" style="padding:4px 0;">先添加参与人</span></div>
+
+    <button class="btn-primary" onclick="addItem()">加入这笔消费</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">每人汇总</div>
+    <div id="result-area"><div class="empty">添加消费项目后自动计算</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">转账清单</div>
+    <div id="settle-area"><div class="empty">添加消费项目后自动计算</div></div>
+  </div>
+</div>
+
+<script>
+let people = [];
+let items = [];
+
+function addPerson() {
+  const input = document.getElementById('person-input');
+  const name = input.value.trim();
+  if (!name || people.includes(name)) { input.focus(); return; }
+  people.push(name);
+  input.value = '';
+  input.focus();
+  renderPeople();
+  renderCheckboxes();
+  calculate();
+}
+
+function removePerson(name) {
+  people = people.filter(p => p !== name);
+  items = items
+    .map(item => ({
+      ...item,
+      payers: item.payers.filter(p => p !== name),
+      splitters: item.splitters.filter(p => p !== name)
+    }))
+    .filter(item => item.payers.length > 0 && item.splitters.length > 0);
+  renderPeople();
+  renderCheckboxes();
+  renderItems();
+  calculate();
+}
+
+function renderPeople() {
+  const c = document.getElementById('people-tags');
+  c.innerHTML = people.length === 0
+    ? ''
+    : people.map(p =>
+        `<div class="tag">${p}<button class="tag-remove" onclick="removePerson('${p}')" title="移除">×</button></div>`
+      ).join('');
+}
+
+function renderCheckboxes() {
+  ['payer-checks', 'splitter-checks'].forEach(id => {
+    const c = document.getElementById(id);
+    if (people.length === 0) {
+      c.innerHTML = '<span class="empty" style="padding:4px 0;">先添加参与人</span>';
+      return;
+    }
+    c.innerHTML = people.map(p =>
+      `<label class="check-label"><input type="checkbox" value="${p}" /> ${p}</label>`
+    ).join('');
+  });
+}
+
+function addItem() {
+  const name = document.getElementById('item-name').value.trim();
+  const amount = parseFloat(document.getElementById('item-amount').value);
+  const payers = [...document.querySelectorAll('#payer-checks input:checked')].map(c => c.value);
+  const splitters = [...document.querySelectorAll('#splitter-checks input:checked')].map(c => c.value);
+
+  if (!name) { alert('请输入项目名称'); return; }
+  if (isNaN(amount) || amount <= 0) { alert('请输入有效金额'); return; }
+  if (payers.length === 0) { alert('请选择谁付的钱'); return; }
+  if (splitters.length === 0) { alert('请选择谁参与AA'); return; }
+
+  items.push({ name, amount, payers, splitters });
+  document.getElementById('item-name').value = '';
+  document.getElementById('item-amount').value = '';
+  document.querySelectorAll('#payer-checks input, #splitter-checks input').forEach(c => c.checked = false);
+  document.getElementById('form-divider').style.display = 'block';
+  renderItems();
+  calculate();
+}
+
+function removeItem(idx) {
+  items.splice(idx, 1);
+  if (items.length === 0) document.getElementById('form-divider').style.display = 'none';
+  renderItems();
+  calculate();
+}
+
+function renderItems() {
+  const c = document.getElementById('items-list');
+  c.innerHTML = items.map((item, i) =>
+    `<div class="item-entry">
+      <div>
+        <div class="item-name">${item.name} &nbsp;¥${item.amount.toFixed(2)}</div>
+        <div class="item-meta">付款：${item.payers.join('、')}&emsp;AA：${item.splitters.join('、')}</div>
+      </div>
+      <button class="item-del" onclick="removeItem(${i})" title="删除">×</button>
+    </div>`
+  ).join('');
+}
+
+function calculate() {
+  if (people.length === 0 || items.length === 0) {
+    document.getElementById('result-area').innerHTML = '<div class="empty">添加消费项目后自动计算</div>';
+    document.getElementById('settle-area').innerHTML = '<div class="empty">添加消费项目后自动计算</div>';
+    return;
+  }
+
+  const balance = {};
+  people.forEach(p => balance[p] = 0);
+
+  items.forEach(item => {
+    const perPayer = item.amount / item.payers.length;
+    item.payers.forEach(p => { if (p in balance) balance[p] += perPayer; });
+    const perSplit = item.amount / item.splitters.length;
+    item.splitters.forEach(p => { if (p in balance) balance[p] -= perSplit; });
+  });
+
+  document.getElementById('result-area').innerHTML = people.map(p => {
+    const b = balance[p];
+    const abs = Math.abs(b);
+    let cls, label;
+    if (b > 0.005) { cls = 'r-in'; label = `应收回 ¥${abs.toFixed(2)}`; }
+    else if (b < -0.005) { cls = 'r-out'; label = `需付出 ¥${abs.toFixed(2)}`; }
+    else { cls = 'r-zero'; label = '已平账'; }
+    return `<div class="result-row"><span class="r-name">${p}</span><span class="r-amount ${cls}">${label}</span></div>`;
+  }).join('');
+
+  const debtors = people.filter(p => balance[p] < -0.005).map(p => ({ name: p, amount: -balance[p] }));
+  const creditors = people.filter(p => balance[p] > 0.005).map(p => ({ name: p, amount: balance[p] }));
+  const transfers = [];
+
+  const d = debtors.map(x => ({ ...x }));
+  const c = creditors.map(x => ({ ...x }));
+  let i = 0, j = 0;
+  while (i < d.length && j < c.length) {
+    const amt = Math.min(d[i].amount, c[j].amount);
+    transfers.push({ from: d[i].name, to: c[j].name, amount: amt });
+    d[i].amount -= amt;
+    c[j].amount -= amt;
+    if (d[i].amount < 0.005) i++;
+    if (c[j].amount < 0.005) j++;
+  }
+
+  document.getElementById('settle-area').innerHTML = transfers.length === 0
+    ? '<div class="empty">无需转账，已平账</div>'
+    : transfers.map(t =>
+        `<div class="settle-row">
+          <span class="r-name">${t.from}</span>
+          <span class="s-arrow">→</span>
+          <span class="s-amount">¥${t.amount.toFixed(2)}</span>
+          <span class="s-arrow">→</span>
+          <span class="r-name">${t.to}</span>
+        </div>`
+      ).join('');
+}
+
+document.getElementById('person-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPerson();
+});
+</script>
+</body>
+</html>
